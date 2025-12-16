@@ -1,5 +1,5 @@
 ---
-title: "<span style='font-size: 30px;'>Wielowymiarowa Analiza Danych</span>"
+title: "<span style='font-size: 30px;'>RAPORT</span>"
 author: |
   <p>Aleksandra Ochocińska</p>
   <p>Mateusz Wasiewski</p>
@@ -16,6 +16,28 @@ output:
     highlight_color: "##ADD8E6"  
 ---
 
+```{r include=FALSE}
+#Zainstalowanie bibliotek
+packages <- c(
+  "skimr","dplyr", "readr", "naniar", "ggplot2", "rmdformats", "validate", "validatetools", 
+  "dcmodify", "errorlocate", "deductive", "VIM", "simputation", "visdat", 
+  "lumberjack", "ISLR", "dlookr", "xts", "quantmod", "ROCR", "mice", 
+  "Information", "scorecard", "tidyverse", "plotly", "rpart", "psych", "stats", "qwraps2", "kableExtra", "ggstatsplot")
+
+# Funkcja instalująca i ładująca pakiety
+install_if_missing <- function(packages) {
+  for (pkg in packages) {
+    if (!require(pkg, character.only = TRUE)) { 
+      install.packages(pkg)                    
+    }
+    library(pkg, character.only = TRUE)        
+  }
+}
+install_if_missing(packages)
+```
+
+# WIELOWYMIAROWA ANALIZA DANYCH
+
 # **1. Wstęp**
 
 ## **1.1 Informacje o projekcie**
@@ -24,7 +46,10 @@ output:
 
 **Data:** Okres na trzecim semestrze Analityki Gospodarczej II
 
-**Autorami projketu są:** Aleksandra Ochocińska, Mateusz Wasiewski, Adam Sienkiewicz
+**Autorami projketu są:**\
+Aleksandra Ochocińska\
+Mateusz Wasiewski\
+Adam Sienkiewicz
 
 **Wkład poszczególych osób:\
 **Aleksandra Ochocińska - 33,(33)%\
@@ -37,20 +62,17 @@ Adam Sienkiewicz - 33,(33)%
 
 # **2. Dane**
 
-
+Jest to zestaw danych zawierający szczegółowy przegląd rutynowych ćwiczeń wykonywanych przez członków siłowni, a także ich atrybutów fizycznych i wskaźników sprawności.
 
 ```{r include=FALSE}
 # Ustawienie lustra CRAN
 options(repos = c(CRAN = "https://cran.rstudio.com"))
 #Wczytanie danych i zainstalowanie pakietow
-install.packages("readr")
-install.packages("skimr")
-library("readr")
-library(skimr)
+
 silownia <- read_csv("silownia_new.csv")
 ```
 
-Zmienne w zbiorze danych obejmują:
+#### Zmienne w zbiorze danych obejmują:
 
 • ***Age*** - wiek osoby ćwiczącej.
 
@@ -82,11 +104,219 @@ Zmienne w zbiorze danych obejmują:
 
 • ***BMI*** - wskaźnik masy ciała, wyliczony na podstawie wzrostu i wagi.
 
+#### **Struktura Danych:**
+
+```{r include=FALSE}
+skim(silownia)
+```
+
+|                             |          |
+|-----------------------------|----------|
+| **Nazwa zbioru danych**     | silownia |
+| **Liczba wierszy**          | 973      |
+| **Liczba kolumn**           | 15       |
+| **Kolumny typu tekstowego** | 2        |
+| **Kolumny typu liczbowego** | 13       |
+
 # **3. Czyszczenie danych**
+
+Pierwszy krokiem w procesie czyszczenie danych będzie zmiana nazw kolumn:
+
+-   Weight (kg) na Weight_kg
+
+-   Height (m) na Height_m
+
+-   Session_Duration (hours) na Session_Duration_hours
+
+-   Water_Intake (liters) na Water_Intake_liters
+
+-   Workout_Frequency (days/week) na Workout_Frequency_daysweek
+
+```{r include=FALSE}
+colnames(silownia)[colnames(silownia) == "Weight (kg)"] <- "Weight_kg"
+colnames(silownia)[colnames(silownia) == "Height (m)"] <- "Height_m"
+colnames(silownia)[colnames(silownia) == "Session_Duration (hours)"] <- "Session_Duration_hours"
+colnames(silownia)[colnames(silownia) == "Water_Intake (liters)"] <- "Water_Intake_liters"
+colnames(silownia)[colnames(silownia) == "Workout_Frequency (days/week)"] <- "Workout_Frequency_daysweek"
+```
 
 ## **3.1 Analiza braków danych**
 
+Analiza braków danych to kluczowy krok w przygotowaniu zbioru do modelowania. Proces ten obejmie określenie liczby braków, ich rozmieszczenie w zbiorze danych, a także zbadanie korealacji między brakami danych. Wyniki tej analizy posłużą jako podstawa do podjęcia decyzji o dalszym postępowaniu z brakującymi danymi.
+
+#### Gdzie występują braki i jaki procent stanowią
+
+Pierwszym krokiem w tej analizie będzie określenie tego gdzie wystepują braki danych i jaki procent wszystkich obserwacji stanowią.
+
+```{r echo=FALSE}
+vis_miss(silownia)
+```
+
+W całej bazie danych brakuje **2,7%** danych.
+
+Braki danych występują w kolumnie ***Typ treningu**, **Wiek*** oraz ***BMI***.
+
+#### Braki danych ze względu na kolumny oraz wiersze
+
+Następnie określimy ile braków danych występuje w konkretnych kolumnach oraz wierszach.
+
+```{r echo=FALSE}
+gg_miss_var(silownia)
+
+```
+
+```{r include=FALSE}
+colSums(is.na(silownia))
+```
+
+Kolumna *Wiek* posiada **100 braków**, *Typ treningu* ma **150 braków**, *BMI* ma **150 braków**.
+
+```{r include=FALSE}
+vis_dat(silownia)
+```
+
+```{r include=FALSE}
+kolumny_z_NA <- silownia %>% 
+                  select(Age, Workout_Type, BMI)
+gg_miss_upset(silownia, nsets= 3)
+```
+
+```{r include=FALSE}
+miss_case_table(silownia)
+```
+
+| Liczba braków w wierszu | Liczba wierszy | Procent wszystkich wierszy |
+|-------------------------|----------------|----------------------------|
+| 0                       | 631            | 64,85%                     |
+| 1                       | 287            | 29,50%                     |
+| 2                       | 52             | 5,34%                      |
+| 3                       | 3              | 0,31%                      |
+
+631 wierszy ma 0 braków
+
+287 wierszy ma 1 braków
+
+-   115 w *Typ treningu*
+
+-   106 w *BMI*
+
+-   66 w *Wiek*
+
+52 wiersze ma 2 braków
+
+-   21 wierszy w *Typ treningu* i *BMI*
+
+-   20 wierszy w *Wiek* i *BMI*
+
+-   11 w *Wiek* i *Typ treningu*
+
+3 wiersze mają 3 braki
+
 ## **3.2 Analiza obserwacji odstających**
+
+Obserwacje odstające to wartości, które istotnie odbiegają od pozostałych elementów zbioru danych. Mogą one wynikać m.in. z błędów pomiarowych, specyfiki badanego zjawiska lub wystąpienia nietypowych czynników. W celu identyfikacji obserwacji odstających w analizowanym zbiorze danych zastosowano wykres ramkowy (box plot), który umożliwia wizualne wykrycie wartości wykraczających poza typowy zakres zmienności danych.
+
+#### **Wiek**
+
+
+```{r echo=FALSE}
+boxplot(silownia$Age)
+
+```
+
+Zmienna *Wiek* nie ma obserwacji odstających.
+
+#### **Waga**
+
+```{r echo=FALSE}
+boxplot(silownia$Weight_kg)
+```
+
+Zmienna *Waga* zawiera obserwacje odstające górne, czyli wartości znajdujące się powyżej trzeciego kwartyla o więcej niż 1,5 rozstępu ćwiartkowego.
+
+#### **Wzrost**
+
+```{r echo=FALSE}
+boxplot(silownia$Height_m)
+```
+
+Zmienna *Wzrost* nie posiada odstających.
+
+#### **Maksymalne tętno**
+
+```{r echo=FALSE}
+boxplot(silownia$Max_BPM)
+```
+
+Zmienna *Maksymalne tętno* nie ma obserwacji odstających.
+
+#### **Średnie tętno**
+
+```{r echo=FALSE}
+boxplot(silownia$Avg_BPM) 
+```
+
+Zmienna *Średnie tętno* nie posiada obserwacji odstających.
+
+#### **Tętno spoczynkowe**
+
+```{r echo=FALSE}
+boxplot(silownia$Resting_BPM)
+```
+
+Zmienna *Tętno spoczynkowe* nie ma obserwacji odstających.
+
+#### **Czas trwania sesji**
+
+```{r echo=FALSE}
+boxplot(silownia$Session_Duration_hours)
+```
+
+Zmienna *Czas trwania sesji* nie ma obserwacji odstających.
+
+#### **Spalone kalorie**
+
+```{r echo=FALSE}
+boxplot(silownia$Calories_Burned)
+```
+
+W przypadku zmiennej *Spalone kalorie* występują górne obserwacje odstające, przekraczające wartość trzeciego kwartyla o więcej niż 1,5 rozstępu ćwiartkowego.
+
+#### **Procent tkanki tłuszczowej**
+
+```{r echo=FALSE}
+boxplot(silownia$Fat_Percentage)
+```
+
+Zmienna *Procent tkanki tłuszczowej* nie posiada obserwacji odstających.
+
+#### **Ilość wypitej wody**
+
+```{r echo=FALSE}
+boxplot(silownia$Water_Intake_liters)
+```
+
+Zmienna *Ilość wypitej wody* nie ma obserwacji odstających.
+
+#### **Częstotliwość treningów**
+
+```{r echo=FALSE}
+boxplot(silownia$Workout_Frequency_daysweek)
+```
+
+Zmienna *Częstotliwość treningów* nie posiada obserwacji odstających.
+
+#### **BMI**
+
+```{r echo=FALSE}
+boxplot(silownia$BMI)
+```
+
+Dla zmiennej *BMI* zaobserwowano występowanie górnych obserwacji odstających, przekraczających trzeci kwartyl o więcej niż 1,5 rozstępu ćwiartkowego.
+
+#### **Podsumowanie**
+
+Analiza wykresów ramkowych wykazała, że obserwacje odstające występują w przypadku zmiennych **Waga**, **Spalone kalorie** oraz **BMI**. Są to wyłącznie górne outliery, czyli wartości położone powyżej trzeciego kwartyla o więcej niż 1,5 rozstępu ćwiartkowego. W żadnej ze zmiennych nie stwierdzono obecności ekstremalnych obserwacji odstających.
 
 ## **3.3 Obsługa braków wartości**
 
@@ -100,7 +330,6 @@ Zmienne w zbiorze danych obejmują:
 
 ## **4.3 Analiza korelacji**
 
-
 # **5. Obróbka zmiennych**
 
 ## **5.1 Tworzenie nowych zmiennych**
@@ -112,4 +341,3 @@ Zmienne w zbiorze danych obejmują:
 # **7. Porównanie modeli**
 
 # **8. Wnioski końcowe**
-
