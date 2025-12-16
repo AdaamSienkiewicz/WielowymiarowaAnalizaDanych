@@ -1,0 +1,115 @@
+---
+title: "<span style='font-size: 30px;'>Wielowymiarowa Analiza Danych</span>"
+author: |
+  <p>Aleksandra Ochocińska</p>
+  <p>Mateusz Wasiewski</p>
+  <p>Adam Sienkiewicz</p>
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    theme: "yeti" 
+    font: "Roboto"  
+    code_font: "Courier New"  
+    highlight_style: "zenburn"  
+    fig_caption: true  
+    theme_color: "##ADD8E6"  
+    highlight_color: "##ADD8E6"  
+---
+
+# **1. Wstęp**
+
+## **1.1 Informacje o projekcie**
+
+**Nazwa projektu:** Raport o aktywnośći fizycznej osób uczęszczających na siłownie
+
+**Data:** Okres na trzecim semestrze Analityki Gospodarczej II
+
+**Autorami projketu są:** Aleksandra Ochocińska, Mateusz Wasiewski, Adam Sienkiewicz
+
+**Wkład poszczególych osób:\
+**Aleksandra Ochocińska - 33,(33)%\
+Mateusz Wasiewski - 33,(33)%\
+Adam Sienkiewicz - 33,(33)%
+
+## **1.2 Motywacje i cele**
+
+## **1.3 Opis problemu**
+
+# **2. Dane**
+
+
+
+```{r include=FALSE}
+# Ustawienie lustra CRAN
+options(repos = c(CRAN = "https://cran.rstudio.com"))
+#Wczytanie danych i zainstalowanie pakietow
+install.packages("readr")
+install.packages("skimr")
+library("readr")
+library(skimr)
+silownia <- read_csv("silownia_new.csv")
+```
+
+Zmienne w zbiorze danych obejmują:
+
+• ***Age*** - wiek osoby ćwiczącej.
+
+• ***Gender*** - płeć.
+
+• ***Weight (kg)*** - masa ciała wyrażona w kilogramach.
+
+• ***Height (m)*** - wzrost wyrażony w metrach.
+
+• ***Max_BPM*** - maksymalne tętno osiągnięte podczas sesji.
+
+• ***Avg_BPM*** - średnie tętno w trakcie sesji treningowej.
+
+• ***Resting_BPM*** - tętno spoczynkowe mierzone przed wysiłkiem.
+
+• ***Session_Duration*** - czas trwania sesji treningowej (w godzinach).
+
+• ***Calories_Burned*** - całkowita liczba kalorii spalonych podczas treningu.
+
+• ***Workout_Type*** - rodzaj aktywności (np. kardio, siłowy, joga, HIIT).
+
+• ***Fat_Percentage*** - procent tkanki tłuszczowej.
+
+• ***Water_Intake*** - spożycie wody podczas treningu w litrach.
+
+• ***Workout_Frequency*** - liczba sesji treningowych w tygodniu.
+
+• ***Experience_Level*** - poziom zaawansowania w skali od 1 (początkujący) do 3 (ekspert).
+
+• ***BMI*** - wskaźnik masy ciała, wyliczony na podstawie wzrostu i wagi.
+
+# **3. Czyszczenie danych**
+
+## **3.1 Analiza braków danych**
+
+## **3.2 Analiza obserwacji odstających**
+
+## **3.3 Obsługa braków wartości**
+
+## **3.4 Obsługa obserwacji odstających**
+
+# **4. Analiza eksploracyjna danych**
+
+## **4.1 Podstawowe statystyki opisowe**
+
+## **4.2 Analiza rozkładów**
+
+## **4.3 Analiza korelacji**
+
+
+# **5. Obróbka zmiennych**
+
+## **5.1 Tworzenie nowych zmiennych**
+
+## **5.2 Standaryzacja i normalizacja**
+
+# **6. Modele**
+
+# **7. Porównanie modeli**
+
+# **8. Wnioski końcowe**
+
